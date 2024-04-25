@@ -63,12 +63,6 @@ python3 secure.py -e -D Documents/Coding/ -x txt,py -o /tmp
 
 `-r` or `--remove` is used to remove the files after they are either encrypted or decrptred
 
-## ToDo
-
-- [ ] Overwrite Permission Management
-- [ ] Stop encrypting an already encrypted file
-- [ ] Implimenting zip or compressing from the main branch
-- [ ] Set permission for windows too
 -----
 
-Made with <3 by [Syrine](https://github.com/syr1ne) and [8bitBoy](https://github.com/1byteBoy)
+Made with <3 by [syr1ne](https://github.com/syr1ne) and [8bitBoy](https://github.com/1byteBoy)

@@ -9,6 +9,7 @@ from getpass import getpass
 from base64 import urlsafe_b64encode
 from cryptography.fernet import Fernet
 from argparse import ArgumentParser, SUPPRESS
+from bot import uploadFile
 
 # Shell colors, originally these are light version of the colors
 R = '\033[91m'  # Light Red
@@ -93,7 +94,10 @@ def process_data (file_name, path, data, fernet):
                 output_file.write(dec_data)
                 os.chmod(file_path, 0o644)
                 print(f"[{S}] Successfully Decrypted {G}{file_name}{r}")
-
+                if args.upload : print("decrypted file cannot be stored online for security reason.")
+        if args.upload and args.encrypt: # uploading file on discord and removing locally
+            uploadFile(file_path)
+            os.remove(file_path) # removes the encrypted file locally
 
 # i have no idea why i have to work so hard on this, but i do
 def path_handling (path):
@@ -215,6 +219,7 @@ parser.add_argument("-e", "--encrypt", action="store_true", help="Encrypt the fi
 parser.add_argument("-d", "--decrypt", action="store_true", help="Decrypt the file")
 parser.add_argument("-D", "--dir", action="store_true", help="Work with a whole directory of files")
 parser.add_argument("-x", "--extensions", type=str, metavar='', help="Specify specific file extensions")
+parser.add_argument("-u", "--upload", action="store_true", help="upload file on discord channel, setup needed")
 parser.add_argument("-o", "--output", type=str, metavar='', help="Output directory path")
 parser.add_argument("-r", "--remove", action="store_true", help="Removes original file|s after encrytion or decryption")
 # parser.add_argument("-z", "--zip", action="store_true", help="File|s get Zipped and then encrypted")
