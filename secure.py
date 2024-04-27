@@ -76,6 +76,17 @@ def process_data (file_name, path, data, fernet):
             if path != file_name: file_path = path + mod_file_name
             else: file_path = mod_file_name
 
+    if args.print == True and args.decrypt == True and dec_failed == False:
+        try:
+            print(dec_data.decode('UTF-8'))
+            try:
+                if args.remove == True: os.remove(path + file_name)
+            except:
+                print('not able to delete the file')
+        except:
+            print("error reading the file.")
+        exit()
+
     if os.path.exists(file_path) and not overwrite_all and not dec_failed:
         print(f"\n[{E}] The file named {C}{mod_file_name}{r} already exists.")
         y_or_n = input(f"[{Q}] Do you want to overwrite [Y]es/[A]ll/[N]o: ")
@@ -88,7 +99,7 @@ def process_data (file_name, path, data, fernet):
             if args.encrypt:
                 output_file.write(enc_data)
                 if system() == 'Linux'  : os.chmod(file_path, 0o600)        # read only permission set for linux
-                if system() == 'Windows': os.chmod(file_path, stat.S_IREAD) # read only permission set for windows
+                # if system() == 'Windows': os.chmod(file_path, stat.S_IREAD) # read only permission set for windows
                 print(f"[{S}] Successfully Encrypted {G}{file_name}{r}")
             elif args.decrypt and dec_failed == False:
                 output_file.write(dec_data)
@@ -217,6 +228,7 @@ parser = ArgumentParser(description=f'{I}Encrypts and Decrypts Data{r}',
 
 parser.add_argument("-e", "--encrypt", action="store_true", help="Encrypt the file")
 parser.add_argument("-d", "--decrypt", action="store_true", help="Decrypt the file")
+parser.add_argument("-p", "--print", action="store_true", help="decrypt and print the data on terminal without creating any file.")
 parser.add_argument("-D", "--dir", action="store_true", help="Work with a whole directory of files")
 parser.add_argument("-x", "--extensions", type=str, metavar='', help="Specify specific file extensions")
 parser.add_argument("-u", "--upload", action="store_true", help="upload file on discord channel, setup needed")
