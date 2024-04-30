@@ -1,38 +1,41 @@
 #!/usr/bin/env python3
 
 import os
-import stat
+# import stat
+import asyncio
 from hashlib import md5
-from platform import system
 from getpass import getpass
+from platform import system
 # from shutil import make_archive
 from base64 import urlsafe_b64encode
 from cryptography.fernet import Fernet
 from argparse import ArgumentParser, SUPPRESS
-from bot import uploadFile
 
-# Shell colors, originally these are light version of the colors
-R = '\033[91m'  # Light Red
-G = '\033[92m'  # Light Green
-B = '\033[94m'  # Light Blue
-C = '\033[96m'  # Cyan
-Y = '\033[93m'  # Yellow
-P = '\033[95m'  # Purple
-r = '\033[0m'   # reset color value
+# prints plain text data on terminal in beautified way
+# Note: just for fun, not exactly sure we will keep it or not
+from rich.panel import Panel
+from rich.syntax import Syntax
+from rich.console import Console
+from pygments.lexers import guess_lexer_for_filename
 
-# Shell Font Style
-I = '\033[3m'  # Italic
-
-# Success, Error and Question prompt color coding
-S = f'{G}*{r}'
-E = f'{R}!{r}'
-Q = f'{Y}?{r}'
+# Custom import 
+from src.bots.discord import uploadFile
+from src.file_tweak import file_tweak
+from src.colors import R, G, B, C, Y, P, I, S, E, Q, r # this is stupid i know, sorry
 
 if   system() == 'Linux'  : separator = '/'
 elif system() == 'Windows': separator = '\\'
 
-write_file    = True
+write_file    = False
 overwrite_all = False
+
+file_count = 0
+skip_count = 0
+
+# for saving files paths first and then working with them
+file_dict = {} # empty dictionary
+# zip_arr   = []
+
 
 # generates a key with the provided password using fernet symmetric encryption algorithm
 def gen_fernet_key (masterpass:bytes) -> bytes:
@@ -51,44 +54,45 @@ def input_master_key ():
     return Fernet(key)
 
 
+# prints plain text data directly on terminal interface
+def print_dec_data(dec_data, mod_file_name):
+    try:
+        content = dec_data.decode('UTF-8')
+        lexer = guess_lexer_for_filename(mod_file_name, content)
+        # Themes : monokai, dracula, solarized-dark
+        syntax = Syntax(content, lexer, theme="dracula", line_numbers=True)
+        console = Console()
+        syntax_with_border = Panel(syntax, title=mod_file_name)
+        console.print(syntax_with_border)
+    except UnicodeDecodeError: print(f"[{E}] Error reading data in {R}{mod_file_name}{r}")
+
+
 # encryption and decryption in one function
 def process_data (file_name, path, data, fernet):
     global write_file, overwrite_all
     dec_failed = False
-    if args.encrypt: enc_data = fernet.encrypt(data)
+    if args.encrypt: 
+        enc_data = fernet.encrypt(data)
+        write_file = True
     elif args.decrypt:
         try:
             dec_data = fernet.decrypt(data)
+            write_file = True
         except:
             print(f"[{E}] Decryption Failed for {R}{file_name}{r}")
             # variable implimented not to write or remove files if the decryption failed
             dec_failed = True
-            write_file = False
 
     # output file naming for both encrypted and decrypted file
-    if args.encrypt:
-        mod_file_name = 'enc_' + file_name
-        if path != file_name: file_path = path + mod_file_name
-        else: file_path = mod_file_name
-    elif args.decrypt:
-            if 'enc_' in file_name: mod_file_name = file_name[4:]
-            else: mod_file_name = file_name
-            if path != file_name: file_path = path + mod_file_name
-            else: file_path = mod_file_name
-
-    if args.print == True and args.decrypt == True and dec_failed == False:
-        try:
-            print(dec_data.decode('UTF-8'))
-            try:
-                if args.remove == True: os.remove(path + file_name)
-            except:
-                print('not able to delete the file')
-        except:
-            print("error reading the file.")
-        exit()
+    # it's recomended not to change the encrypted file name
+    # and neither rename a non encrypted file to enc_ intensinally for the harcoded nature
+    if args.encrypt: 
+        file_path, mod_file_name = file_tweak(file_name, path, True)
+    elif args.decrypt: 
+        file_path, mod_file_name = file_tweak(file_name, path)
 
     if os.path.exists(file_path) and not overwrite_all and not dec_failed:
-        print(f"\n[{E}] The file named {C}{mod_file_name}{r} already exists.")
+        print(f"\n[{E}] A file named {C}{mod_file_name}{r} already exists.")
         y_or_n = input(f"[{Q}] Do you want to overwrite [Y]es/[A]ll/[N]o: ")
         if y_or_n.lower() != 'y' and y_or_n.lower() != 'a': write_file = False
         if y_or_n.lower() == 'a': overwrite_all = True
@@ -98,17 +102,20 @@ def process_data (file_name, path, data, fernet):
             output_file.seek(0)
             if args.encrypt:
                 output_file.write(enc_data)
-                if system() == 'Linux'  : os.chmod(file_path, 0o600)        # read only permission set for linux
-                # if system() == 'Windows': os.chmod(file_path, stat.S_IREAD) # read only permission set for windows
+                if system() == 'Linux': os.chmod(file_path, 0o600) # read only permission set for linux
+                # if system() == 'Windows': 
+                    # os.chmod(file_path, stat.S_IREAD) # read only permission set for windows
                 print(f"[{S}] Successfully Encrypted {G}{file_name}{r}")
             elif args.decrypt and dec_failed == False:
                 output_file.write(dec_data)
                 os.chmod(file_path, 0o644)
                 print(f"[{S}] Successfully Decrypted {G}{file_name}{r}")
-                if args.upload : print("decrypted file cannot be stored online for security reason.")
-        if args.upload and args.encrypt: # uploading file on discord and removing locally
-            uploadFile(file_path)
-            os.remove(file_path) # removes the encrypted file locally
+                if args.print and not dec_failed and not args.encrypt:
+                    print_dec_data(dec_data, mod_file_name)
+        if args.upload and args.encrypt:
+            # uploadFile(mod_file_name, file_path)
+            file_dict[mod_file_name] = file_path
+
 
 # i have no idea why i have to work so hard on this, but i do
 def path_handling (path):
@@ -135,12 +142,17 @@ def path_handling (path):
 # checks if a perticular file is valid and prints related errors
 def validate_file (file_path):
     fileName, path = path_handling(file_path)
-
+    global skip_count
     # to prevent encrypting an already encrypted file
-    if args.encrypt and 'enc_' in fileName: return False, None, None, None
+    if args.encrypt and 'enc_' in fileName:
+        skip_count = skip_count + 1
+        print (f"[{E}] Skipping {fileName}")
+        return False, None, None, None
     # to prevent checking files that doesn't have enc_ before them
     # a better logic will be applied in future to deal with any sort of file
-    elif args.decrypt and not 'enc_' in fileName: return False, None, None, None
+    elif args.decrypt and not 'enc_' in fileName: 
+        print (f"[{E}] Skipping {fileName}") 
+        return False, None, None, None
 
     if fileName != path: filePath = path + fileName
     else: filePath = fileName
@@ -151,9 +163,9 @@ def validate_file (file_path):
             return True, fileName, path, data
     except FileNotFoundError : print(f"[{E}] The specified file {C}{fileName}{r} does not exist")
     except PermissionError   : print(f"[{E}] Permission denied for file {C}{fileName}{r}")
-    except IsADirectoryError : print(f"[{E}] {B}{fileName}{r} is a directory")
+    except IsADirectoryError : print(f"[{E}] {B}{fileName}{r} is a directory"); exit()
     except NotADirectoryError: print(f"[{E}] What the $%&* is {Y}{fileName}{r}")
-    except UnicodeDecodeError: print(f"[{E}] Sorry, binary file ({G}{fileName}{r}) support coming soon!")
+    # except UnicodeDecodeError: print(f"[{E}] Sorry, binary file ({G}{fileName}{r}) support coming soon!")
     return False, None, None, None
 
 
@@ -179,12 +191,24 @@ def is_valid_directory (dir_path, is_out_dir=None):
 
 def process_file (fernet, file_path):
     is_file, file_name, path, data = validate_file(file_path)
-    if its_out_dir : path = out_dir_path
-    # This is only for one single file instead of a directory of files
-    if not args.dir and is_file : fernet = input_master_key()
-    if is_file: process_data(file_name, path, data, fernet)
-    if args.remove and write_file : os.remove(file_path)
+    global file_count
+    file_count = file_count + 1
+    if is_file:
+        if its_out_dir: path = out_dir_path
+        # This is only for one single file instead of a directory of files
+        if not args.dir and is_file: fernet = input_master_key()
+        process_data(file_name, path, data, fernet)
+        if args.remove and write_file: 
+            # print(f"Deleting : {file_name}")
+            if args.upload and not args.decrypt: pass
+            else: os.remove(file_path)
 
+
+def upload_online():
+    if args.upload and args.encrypt and file_count != skip_count:
+        print(f"\n[{Y}...{r}] Trying to connect to discord")
+        asyncio.run(uploadFile(file_dict, args.remove))
+    
 
 # initial logic and condition sets
 def main () :
@@ -194,8 +218,10 @@ def main () :
     its_out_dir = False
     if not any(vars(args).values()): parser.print_help()
     elif args.encrypt and args.decrypt:
-        print(f"[{R}!{r}] Please use only one cryptographic process")
+        print(f"[{E}] Please use only one cryptographic process")
     elif args.encrypt or args.decrypt:
+        if args.upload and args.decrypt: 
+            print(f"[{E}] Non Encrypted files will not be stored online for security reason.\n") 
         try:
             if args.output :
                 its_out_dir, out_dir_path = is_valid_directory(args.output, True)
@@ -214,24 +240,27 @@ def main () :
                                     process_file(fernet, file_path)
                                     break
                         else: process_file(fernet, file_path)
-            # a logic is placed at function called, to cope with the fernet key
-            else: process_file(None, args.path)
+                    upload_online()
+            # a logic is placed at function called, to cope with the fernet key ..
+            else: 
+                process_file(None, args.path)
+                upload_online()
         except KeyboardInterrupt: print(f"\n\n[»] Bye")
     else: print(f"[{E}] Please choose a cryptographic process")
 
 
-# lots of flags and arguments o_0
+# Available Options and Flags
 print()
 parser = ArgumentParser(description=f'{I}Encrypts and Decrypts Data{r}',
-                         epilog='Made with <3 by @Syrine && @1byteBoy',
+                         epilog='Made with <3 by @syr1ne && @1byteBoy',
                          usage="%(prog)s [OPTIONS...] [PATH...]")
 
 parser.add_argument("-e", "--encrypt", action="store_true", help="Encrypt the file")
 parser.add_argument("-d", "--decrypt", action="store_true", help="Decrypt the file")
-parser.add_argument("-p", "--print", action="store_true", help="decrypt and print the data on terminal without creating any file.")
+parser.add_argument("-p", "--print", action="store_true", help="Print decrypted data directly")
 parser.add_argument("-D", "--dir", action="store_true", help="Work with a whole directory of files")
 parser.add_argument("-x", "--extensions", type=str, metavar='', help="Specify specific file extensions")
-parser.add_argument("-u", "--upload", action="store_true", help="upload file on discord channel, setup needed")
+parser.add_argument("-u", "--upload", action="store_true", help="Upload file|s on discord")
 parser.add_argument("-o", "--output", type=str, metavar='', help="Output directory path")
 parser.add_argument("-r", "--remove", action="store_true", help="Removes original file|s after encrytion or decryption")
 # parser.add_argument("-z", "--zip", action="store_true", help="File|s get Zipped and then encrypted")
