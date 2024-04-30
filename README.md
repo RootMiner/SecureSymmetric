@@ -33,35 +33,27 @@ options:
   -e, --encrypt       Encrypt the file
   -d, --decrypt       Decrypt the file
   -D, --dir           Work with a whole directory of files
-  -x, --extensions   Specify specific file extensions
-  -o, --output       Output file path
+  -x, --extensions    Specify specific file extensions
+  -u, --upload        upload file on discord
+  -o, --output        Output file path
   -r, --remove        Removes original file after encryting or decrypting
 
-Made with <3 by @Syrine && @1byteBoy
+Made with <3 by @syr1ne && @1byteBoy
 ```
 -----
 
-**While main options are self-explainatory but let me explain some of them a bit clearly**
+**While main options are self-explainatory but to understand more about what each flags/options actually does visit [Usage WiKi](https://github.com/RootMiner/SecureSymmetric/wiki#usage)**
 
-`-D` or `--dir` is used if we want to encrypt or decrypt all the files present in a perticular directory
+## Problems && ToDo's 
 
-```
-python3 secure.py -e -D Documents/
-```
+- Currently hard coded check is done for encrypted and non encrypted file, but we are trying to do a proper dynamic check on the files.
 
-`-x` or `--extensions` is used if we want to encrypt or decrypt files with specific file extension. 
+- Verbosity is added as default option, to let user see which files is being skipped during the process.
+We might add this as an option in future 
 
-```
-python3 secure.py -e -D Documents/Coding/ -x txt,py
-```
+- Certain functionality of windows is missing
 
-`-o` or `--output` is used to specify a custom directory where we want to save our encrypted or decrypted files.
-
-```
-python3 secure.py -e -D Documents/Coding/ -x txt,py -o /tmp
-```
-
-`-r` or `--remove` is used to remove the files after they are either encrypted or decrptred
+- Update the WIKI Page
 
 -----
 
