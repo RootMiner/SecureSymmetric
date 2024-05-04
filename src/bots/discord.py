@@ -19,7 +19,7 @@ def write_env_var():
     return TOKEN, CHANNEL
 
 
-# counts the maximum possible lenght of the file for spacing
+# counts the maximum possible length of the file for spacing
 def count_max_name_len(files_dict):
     max_file_name_len = 0
     for file_name, _ in files_dict.items():

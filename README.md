@@ -46,6 +46,8 @@ Made with <3 by @syr1ne && @1byteBoy
 
 ## Problems && ToDo's 
 
+- single file zipping not working.
+
 - Currently hard coded check is done for encrypted and non encrypted file, but we are trying to do a proper dynamic check on the files.
 
 - Verbosity is added as default option, to let user see which files is being skipped during the process.
@@ -54,6 +56,7 @@ We might add this as an option in future
 - Certain functionality of windows is missing
 
 - Update the WIKI Page
+
 
 -----
 
