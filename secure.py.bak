@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import os
+# import stat
 import asyncio
 from hashlib import md5
 from getpass import getpass
 from platform import system
-from shutil import make_archive
+# from shutil import make_archive
 from base64 import urlsafe_b64encode
 from cryptography.fernet import Fernet
 from argparse import ArgumentParser, SUPPRESS
@@ -20,11 +21,10 @@ from pygments.lexers import guess_lexer_for_filename
 # Custom import 
 from src.bots.discord import uploadFile
 from src.file_tweak import file_tweak
-from src.colors import *
+from src.colors import R, G, B, C, Y, P, I, S, E, Q, r # this is stupid i know, sorry
 
 if   system() == 'Linux'  : separator = '/'
 elif system() == 'Windows': separator = '\\'
-
 
 write_file    = False
 overwrite_all = False
@@ -33,7 +33,8 @@ file_count = 0
 skip_count = 0
 
 # for saving files paths first and then working with them
-file_dict = {}
+file_dict = {} # empty dictionary
+# zip_arr   = []
 
 
 # generates a key with the provided password using fernet symmetric encryption algorithm
@@ -53,6 +54,19 @@ def input_master_key ():
     return Fernet(key)
 
 
+# prints plain text data directly on terminal interface
+def print_dec_data(dec_data, mod_file_name):
+    try:
+        content = dec_data.decode('UTF-8')
+        lexer = guess_lexer_for_filename(mod_file_name, content)
+        # Themes : monokai, dracula, solarized-dark
+        syntax = Syntax(content, lexer, theme="dracula", line_numbers=True)
+        console = Console()
+        syntax_with_border = Panel(syntax, title=mod_file_name)
+        console.print(syntax_with_border)
+    except UnicodeDecodeError: print(f"[{E}] Error reading data in {R}{mod_file_name}{r}")
+
+
 # encryption and decryption in one function
 def process_data (file_name, path, data, fernet):
     global write_file, overwrite_all
@@ -69,9 +83,7 @@ def process_data (file_name, path, data, fernet):
             # variable implimented not to write or remove files if the decryption failed
             dec_failed = True
 
-
-
-# output file naming for both encrypted and decrypted file
+    # output file naming for both encrypted and decrypted file
     # it's recomended not to change the encrypted file name
     # and neither rename a non encrypted file to enc_ intensinally for the harcoded nature
     if args.encrypt: 
@@ -80,14 +92,10 @@ def process_data (file_name, path, data, fernet):
         file_path, mod_file_name = file_tweak(file_name, path)
 
     if os.path.exists(file_path) and not overwrite_all and not dec_failed:
-      print(f"\n[{E}] A file named {C}{mod_file_name}{r} already exists.")
-      while True:
-        try: y_or_n = input(f"[{Q}] Do you want to overwrite [Y]es/[A]ll/[N]o: ").lower()
-        except: pass
-        if y_or_n == "y": break
-        elif y_or_n == "a": overwrite_all = True; break
-        elif y_or_n == "n": write_file = False; break
-        print("you have made an invalid choice, try again.")
+        print(f"\n[{E}] A file named {C}{mod_file_name}{r} already exists.")
+        y_or_n = input(f"[{Q}] Do you want to overwrite [Y]es/[A]ll/[N]o: ")
+        if y_or_n.lower() != 'y' and y_or_n.lower() != 'a': write_file = False
+        if y_or_n.lower() == 'a': overwrite_all = True
 
     if write_file == True:
         with open(file_path, 'wb') as output_file:
@@ -131,7 +139,7 @@ def path_handling (path):
     return obj_name, obj_path
 
 
-# checks if a particular file is valid and prints related errors
+# checks if a perticular file is valid and prints related errors
 def validate_file (file_path):
     fileName, path = path_handling(file_path)
     global skip_count
@@ -201,16 +209,6 @@ def upload_online():
         print(f"\n[{Y}...{r}] Trying to connect to discord")
         asyncio.run(uploadFile(file_dict, args.remove))
     
-def zipping(folder_name=None):
-    if args.encrypt:
-        if args.zip: # zip not working with single files
-            for file in file_dict:
-                make_archive(file, 'zip', file)
-        if args.zipDir:
-            make_archive(folder_name, 'zip', folder_name)
-            return folder_name + ".zip"
-    else:
-        print("zipping can only be done with encryption")
 
 # initial logic and condition sets
 def main () :
@@ -232,36 +230,20 @@ def main () :
                     extensions = [ext.strip() for ext in args.extensions.split(",")]
                 if is_valid_directory(args.path):
                     fernet = input_master_key()
-                    if args.zipDir: process_file(fernet, zipping(args.path)); upload_online()
-                    elif args.zip:
-                        dirContent = os.listdir(args.path)
-                        for content in dirContent:
-                            # the file path is also needed in case of no extension provided
-                            file_path = os.path.join(args.path, content)
-                            if args.extensions:
-                                for extension in extensions:
-                                    if content.endswith(extension):
-                                        zipping()
-                                        process_file(fernet, file_path)
-                                        break
-                            else: process_file(fernet, file_path)
-                        upload_online()
-                    else:
-                        dirContent = os.listdir(args.path)
-                        for content in dirContent:
-                            # the file path is also needed in case of no extension provided
-                            file_path = os.path.join(args.path, content)
-                            if args.extensions:
-                                for extension in extensions:
-                                    if content.endswith(extension):
-                                        process_file(fernet, file_path)
-                                        break
-                            else: process_file(fernet, file_path)
-                        upload_online()
+                    dirContent = os.listdir(args.path)
+                    for content in dirContent:
+                        # the file path is also needed in case of no extension provided
+                        file_path = os.path.join(args.path, content)
+                        if args.extensions:
+                            for extension in extensions:
+                                if content.endswith(extension):
+                                    process_file(fernet, file_path)
+                                    break
+                        else: process_file(fernet, file_path)
+                    upload_online()
             # a logic is placed at function called, to cope with the fernet key ..
             else: 
                 process_file(None, args.path)
-                zipping()
                 upload_online()
         except KeyboardInterrupt: print(f"\n\n[»] Bye")
     else: print(f"[{E}] Please choose a cryptographic process")
@@ -281,8 +263,7 @@ parser.add_argument("-x", "--extensions", type=str, metavar='', help="Specify sp
 parser.add_argument("-u", "--upload", action="store_true", help="Upload file|s on discord")
 parser.add_argument("-o", "--output", type=str, metavar='', help="Output directory path")
 parser.add_argument("-r", "--remove", action="store_true", help="Removes original file|s after encrytion or decryption")
-parser.add_argument("-z", "--zip", action="store_true", help="File|s get Zipped and then encrypted")
-parser.add_argument("-Z", "--zipDir", action="store_true", help="folder get zipped")
+# parser.add_argument("-z", "--zip", action="store_true", help="File|s get Zipped and then encrypted")
 parser.add_argument('path', type=str, nargs='?', help=SUPPRESS)
 args = parser.parse_args()
 
