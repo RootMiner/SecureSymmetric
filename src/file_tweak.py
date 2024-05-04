@@ -1,4 +1,4 @@
-# ---------
+# need to <<fix>> this, user is not allowed to change file name
 def file_tweak(file_name, path, is_enc=None):
     if is_enc:
         mod_file_name = 'enc_' + file_name
