@@ -46,8 +46,6 @@ Made with <3 by @syr1ne && @1byteBoy
 
 ## Problems && ToDo's 
 
-- single file zipping not working.
-
 - Currently hard coded check is done for encrypted and non encrypted file, but we are trying to do a proper dynamic check on the files.
 
 - Verbosity is added as default option, to let user see which files is being skipped during the process.
@@ -55,8 +53,15 @@ We might add this as an option in future
 
 - Certain functionality of windows is missing
 
-- Update the WIKI Page
+- Update the WiKi Page
 
+- Two archiving method is used namely `shutil` and `zipfile` for directory and single file respectively, but we are trying to impliment one if possible
+
+- A choice if user wants to delete the original files and directory while archiving, archive is currently saved in the directory where script is executed
+
+- if file skipped and upload option is used, do user want to upload the existing file ?
+
+- and option for decrypting the encrypted archive file and unzipping it 
 
 -----
 
