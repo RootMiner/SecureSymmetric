@@ -51,8 +51,8 @@ async def uploadFile(files_dict, is_remove):
             print(f"[{S}] {file_name.ljust(max_name_len)} uploaded on discord successfully")
             # this helps to directly remove enc_file from host
             _, mod_file_name = file_tweak(file_name, file_path.split(separator)[0], None)
-            file_path = file_path.split(separator)[0] + separator + mod_file_name
-            if is_remove: os.remove(file_path)
+            file_path = file_path.split(separator)[0]
+            if is_remove: os.remove(mod_file_name); os.remove(file_path)
         print(f"\n[-:-] Please do Ctrl + c to turn off the bot")
 
     try:
