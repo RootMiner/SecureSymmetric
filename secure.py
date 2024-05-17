@@ -56,7 +56,7 @@ def input_master_key ():
 
 
 # prints plain text data directly on terminal interface
-def print_dec_data(dec_data, mod_file_name):
+def print_decrypted_data(dec_data, mod_file_name):
   try:
     content = dec_data.decode('UTF-8')
     try:
@@ -118,7 +118,7 @@ def process_data (file_name, path, data, fernet):
           os.chmod(file_path, 0o644)
           print(f"[{S}] Successfully Decrypted {G}{file_name}{r}")
           if args.print and not dec_failed and not args.encrypt:
-            print_dec_data(dec_data, mod_file_name)
+            print_decrypted_data(dec_data, mod_file_name)
     if args.upload and args.encrypt:
       file_dict[mod_file_name] = file_path
 
@@ -210,16 +210,17 @@ def process_file (fernet, file_path):
     if args.remove and write_file: 
       # print(f"Deleting : {file_name}")
       if args.upload and not args.decrypt: pass
-      else: os.remove(file_path)
+      else:
+        if input("do you want to delete " + file_path + " [Y/n]: ") in ["", "y", "Y"]: os.remove(file_path); else: pass
 
 
-def upload_online():
+def upload_online ():
   if args.upload and args.encrypt and file_count != skip_count:
     print(f"\n[{Y}...{r}] Trying to connect to discord")
     asyncio.run(uploadFile(file_dict, args.remove))
 
 
-def dir_contents(fernet=None):
+def dir_contents (fernet=None):
   if args.extensions is not None:
     extensions = [ext.strip() for ext in args.extensions.split(",")]
   dirContent = os.listdir(args.path)
@@ -273,7 +274,6 @@ def process_zip ():
   elif args.zip and not args.encrypt: 
       print(f"[{E}] Zipping can only be performed while encrypting")    
   # -- nOte: adding option to remove the initial directory and files
-
 
 # initial logic and condition sets
 def main () :
