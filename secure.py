@@ -20,7 +20,7 @@ from pygments.util import ClassNotFound
 from pygments.lexers import guess_lexer_for_filename
 
 # Custom import 
-from src.bots.discord import uploadFile
+from src.discord import uploadFile
 from src.file_tweak import file_tweak
 from src.colors import *
 
@@ -211,7 +211,8 @@ def process_file (fernet, file_path):
       # print(f"Deleting : {file_name}")
       if args.upload and not args.decrypt: pass
       else:
-        if input("do you want to delete " + file_path + " [Y/n]: ") in ["", "y", "Y"]: os.remove(file_path); else: pass
+        if input("do you want to delete " + file_path + " [Y/n]: ") in ["", "y", "Y"]: os.remove(file_path)
+        else: pass
 
 
 def upload_online ():
@@ -302,9 +303,7 @@ def main () :
 
 # Available Options and Flags
 print()
-parser = ArgumentParser(description=f'{I}Encrypts and Decrypts Data{r}',
-                        epilog='Made with <3 by @syr1ne && @1byteBoy',
-                        usage="%(prog)s [OPTIONS...] [PATH...]")
+parser = ArgumentParser(description=f'{I}Encrypts and Decrypts Data{r}', epilog='Made with <3 by @syr1ne && @1byteBoy', usage="%(prog)s [OPTIONS...] [PATH...]")
 
 parser.add_argument("-e", "--encrypt", action="store_true", help="Encrypt the file")
 parser.add_argument("-d", "--decrypt", action="store_true", help="Decrypt the file")
