@@ -50,6 +50,10 @@ def input_master_key ():
   if   args.encrypt: for_what = 'Encryption'
   elif args.decrypt: for_what = 'Decryption'
   masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password: ")
+  confirm_masterpass = getpass(f"{P}[Œ]{r} Confirm {for_what} Password: ")
+  if masterpass != confirm_masterpass:
+    print("masterpass and confirmed masterpass did not match. try again!")
+    exit()
   print(f"{R}--------{G}-----------{B}----------{C}-----------{r}")
   key = gen_fernet_key(masterpass.encode('utf-8'))
   return Fernet(key)
