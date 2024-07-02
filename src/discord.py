@@ -1,5 +1,6 @@
 import os
 import discord
+from getpass import getpass
 from platform import system
 from dotenv import load_dotenv
 from src.colors import S, E, A
@@ -9,7 +10,7 @@ if   system() == 'Linux'  : separator = '/'
 elif system() == 'Windows': separator = '\\'
 
 def write_env_var():
-  TOKEN   = input(f"\n[{A}] Enter your Discord Bot Token: ")
+  TOKEN   = getpass(f"\n[{A}] Enter your Discord Bot Token [hidden]: ")
   CHANNEL = input(f"[{A}] Enter your_channel id: ")
 
   with open('.env', "w") as env_file:
