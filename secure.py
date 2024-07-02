@@ -49,8 +49,8 @@ def gen_fernet_key (masterpass:bytes) -> bytes:
 def input_master_key ():
   if   args.encrypt: for_what = 'Encryption'
   elif args.decrypt: for_what = 'Decryption'
-  masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password: ")
-  confirm_masterpass = getpass(f"{P}[Œ]{r} Confirm {for_what} Password: ")
+  masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password [hidden]: ")
+  confirm_masterpass = getpass(f"{P}[Œ]{r} Confirm {for_what} Password [hidden]: ")
   if masterpass != confirm_masterpass:
     print("masterpass and confirmed masterpass did not match. try again!")
     exit()
@@ -151,22 +151,23 @@ def path_handling (path):
 
 # checks if a particular file is valid and prints related errors
 def validate_file (file_path):
-  fileName, path = path_handling(file_path)
   global skip_count
-  # to prevent encrypting an already encrypted file
-  if args.encrypt and 'enc_' in fileName:
-    skip_count = skip_count + 1
-    print (f"[{E}] Skipping {fileName}")
-    return False, None, None, None
-  # to prevent checking files that doesn't have enc_ before them
-  # a better logic will be applied in future to deal with any sort of file
-  elif args.decrypt and not 'enc_' in fileName: 
-    print (f"[{E}] Skipping {fileName}") 
-    return False, None, None, None
-
-  if fileName != path: filePath = path + fileName
-  else: filePath = fileName
+  fileName, path = path_handling(file_path)
   try:
+    with open(file_path) as file:
+      enc_string = file.readline()
+      # to prevent encrypting an already encrypted file
+      if args.encrypt and enc_string[:9] == "gAAAAABmg":
+        skip_count = skip_count + 1
+        print (f"[{E}] Skipping {fileName}, file is already encrypted.")
+        return False, None, None, None
+      # to prevent checking files that doesn't have enc_ before them
+      elif args.decrypt and not enc_string[:9] == "gAAAAABmg":
+        print (f"[{E}] Skipping {fileName}, file is not an encrypted file.")
+        return False, None, None, None
+
+    if fileName != path: filePath = path + fileName
+    else: filePath = fileName
     with open(filePath, 'rb') as theFile:
       theFile.seek(0)
       data = theFile.read()
