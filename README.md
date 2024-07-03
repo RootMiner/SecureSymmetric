@@ -1,6 +1,6 @@
 ## What is SecureSymmetric ?
 
-In general it's just a cool name for the project but actually it's just a simple program that encrypts file using 
+In general it's a cool name for the project but actually it's just a simple program that encrypts file using 
 *fernet's symmetric secret key based authenticated cryptography.*
 
 Learn more about **Fernet** at https://cryptography.io/en/latest/fernet/
@@ -15,9 +15,7 @@ By using this software, you agree to use it responsibly and ethically. The devel
 
 ## NOTE
 
-As said earlier, this is just a simple code that i wrote to learn about how symmetric encrytion works and the usage of fernet. This is totally a personal project and i am not a good developer at all, so please test the code on test files before using on your important files. Feel free to make necessary changes from your side. 
-
-Personally i don't like storing data on cloud storage, so it's better for me to store it offline but that too can be vulnerable, specially in case of a ransomeware attack. So if you are willing to save to the cloud and also encrypt it, this tool can help, or better use [cryptomator](https://cryptomator.org/)
+As said earlier, this is just a simple code that we wrote to learn about how symmetric encrytion works and the usage of fernet. This is totally a personal project and we are not a good developer at all, so please test the code on test files before using on your important files. Feel free to make necessary changes from your side. 
 
 ## Usage
 
@@ -44,18 +42,13 @@ Made with <3 by @syr1ne && @1byteBoy
 
 **While main options are self-explainatory but to understand more about what each flags/options actually does visit [Usage WiKi](https://github.com/RootMiner/SecureSymmetric/wiki#usage)**
 
-## Problems && ToDo's 
+## Problems && ToDo's
 
-- Currently hard coded check is done for encrypted and non encrypted file, but we are trying to do a proper dynamic check on the files.
-
-- Verbosity is added as default option, to let user see which files is being skipped during the process.
-We might add this as an option in future 
+- Two archiving method is used namely `shutil` and `zipfile` for directory and single file respectively, but we are trying to impliment one if possible
 
 - Certain functionality of windows is missing
 
 - Update the WiKi Page
-
-- Two archiving method is used namely `shutil` and `zipfile` for directory and single file respectively, but we are trying to impliment one if possible
 
 - A choice if user wants to delete the original files and directory while archiving, archive is currently saved in the directory where script is executed
 
