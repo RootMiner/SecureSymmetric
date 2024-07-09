@@ -12,17 +12,12 @@ from cryptography.fernet import Fernet
 from argparse import ArgumentParser, SUPPRESS
 from shutil import make_archive, copy, rmtree
 
-# prints plain text data on terminal in beautified way
-from rich.panel import Panel
-from rich.syntax import Syntax
-from rich.console import Console
-from pygments.util import ClassNotFound
-from pygments.lexers import guess_lexer_for_filename
-
 # Custom import 
+from src.colors import *
 from src.discord import uploadFile
 from src.file_tweak import file_tweak
-from src.colors import *
+from src.color_cat import print_decrypted_data
+
 
 if   system() == 'Linux'  : separator = '/'
 elif system() == 'Windows': separator = '\\'
@@ -49,32 +44,14 @@ def gen_fernet_key (masterpass:bytes) -> bytes:
 def input_master_key ():
   if   args.encrypt: for_what = 'Encryption'
   elif args.decrypt: for_what = 'Decryption'
-  masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password [hidden]: ")
-  confirm_masterpass = getpass(f"{P}[Œ]{r} Confirm {for_what} Password [hidden]: ")
+  masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password : ")
+  confirm_masterpass = getpass(f"{P}[Œ]{r} Conf. {for_what} Password : ")
   if masterpass != confirm_masterpass:
-    print("masterpass and confirmed masterpass did not match. try again!")
+    print(f"\n[{E}] Password Mismatch. Try again!")
     exit()
   print(f"{R}--------{G}-----------{B}----------{C}-----------{r}")
   key = gen_fernet_key(masterpass.encode('utf-8'))
   return Fernet(key)
-
-
-# prints plain text data directly on terminal interface
-def print_decrypted_data(dec_data, mod_file_name):
-  try:
-    content = dec_data.decode('UTF-8')
-    try:
-      lexer = guess_lexer_for_filename(mod_file_name, content)
-      # Themes : monokai, dracula, solarized-dark
-      syntax = Syntax(content, lexer, theme="dracula", line_numbers=True)
-      console = Console()
-      syntax_with_border = Panel(syntax, title=mod_file_name)
-      console.print(syntax_with_border)
-    except ClassNotFound: 
-      print(f"\n[{E}] No valid file extension, trying to read..\n")
-      print(dec_data.decode('UTF-8')) 
-      pass
-  except UnicodeDecodeError: print(f"[{E}] Error reading data in {R}{mod_file_name}{r}")
 
 
 # encryption and decryption in one function
@@ -105,9 +82,9 @@ def process_data (file_name, path, data, fernet):
     print(f"\n[{E}] A file named {C}{mod_file_name}{r} already exists.")
     while True:
       y_or_n = input(f"[{Q}] Do you want to overwrite [Y]es/[A]ll/[N]o: ").lower()
-      if y_or_n == 'y': pass; break
+      if   y_or_n == 'y': pass; break
       elif y_or_n == 'a': overwrite_all = True; break
-      elif y_or_n == 'n':  write_file = False; break            
+      elif y_or_n == 'n': write_file = False; break            
   if write_file == True:
     with open(file_path, 'wb') as output_file:
         output_file.seek(0)
@@ -154,16 +131,16 @@ def validate_file (file_path):
   global skip_count
   fileName, path = path_handling(file_path)
   try:
-    with open(file_path) as file:
-      enc_string = file.readline()
+    with open(file_path, 'rb') as file:
+      string = file.readline()[:8].decode()
       # to prevent encrypting an already encrypted file
-      if args.encrypt and enc_string[:9] == "gAAAAABmg":
+      if args.encrypt and string == "gAAAAABm":
         skip_count = skip_count + 1
-        print (f"[{E}] Skipping {fileName}, file is already encrypted.")
+        print (f"[{E}] Skipping {fileName}, file is already encrypted")
         return False, None, None, None
-      # to prevent checking files that doesn't have enc_ before them
-      elif args.decrypt and not enc_string[:9] == "gAAAAABmg":
-        print (f"[{E}] Skipping {fileName}, file is not an encrypted file.")
+      # to prevent checking files that doesn't have encrypted data
+      elif args.decrypt and not string == "gAAAAABm":
+        print (f"[{E}] Skipping {fileName}, file is not an encrypted file")
         return False, None, None, None
 
     if fileName != path: filePath = path + fileName
@@ -183,17 +160,20 @@ def validate_file (file_path):
 # check directory 
 def is_valid_directory (dir_path, is_out_dir=None):
   directory_name, path = path_handling(dir_path)
-  if is_out_dir:
-    if directory_name == path: path = path + separator
-    else: path = path + directory_name + separator
   try:
+    if is_out_dir:
+      if not os.access(dir_path, os.W_OK):
+        print(f"[{E}] Write Permission denied on output folder {B}{directory_name}{r}")
+        exit(0)
+      if directory_name == path: path = path + separator
+      else: path = path + directory_name + separator
     dirContent = os.listdir(dir_path)
     if len(dirContent) > 0 or is_out_dir:
       if is_out_dir: return True, path
       else: return True
     else: print(f"[{E}] {B}{directory_name}{r} is an empty directory"); exit()
   except FileNotFoundError:
-    if is_out_dir: print(f"[{E}] Invalid output directory {B}{directory_name}{r} "); exit()
+    if is_out_dir: print(f"[{E}] Invalid output directory {B}{directory_name}{r}"); exit()
     else: print(f"[{E}] The specified directory {B}{directory_name}{r} does not exist")
   except PermissionError   : print(f"[{E}] Permission denied for folder {B}{directory_name}{r}")
   except NotADirectoryError: print(f"[{E}] {B}{directory_name}{r} is not a directory")
@@ -216,7 +196,7 @@ def process_file (fernet, file_path):
       # print(f"Deleting : {file_name}")
       if args.upload and not args.decrypt: pass
       else:
-        if input("do you want to delete " + file_path + " [Y/n]: ") in ["", "y", "Y"]: os.remove(file_path)
+        if input(f"[{Q}] Do you want to delete {file_path} [Y/n] : ") in ["", "y", "Y"]: os.remove(file_path)
         else: pass
 
 
@@ -281,6 +261,7 @@ def process_zip ():
       print(f"[{E}] Zipping can only be performed while encrypting")    
   # -- nOte: adding option to remove the initial directory and files
 
+
 # initial logic and condition sets
 def main () :
   global its_out_dir, out_dir_path
@@ -293,7 +274,7 @@ def main () :
         print(f"[{E}] Non Encrypted files will not be stored online for security reasons.\n") 
       try:
           if args.output :
-            its_out_dir, out_dir_path = is_valid_directory(args.output, True)
+              its_out_dir, out_dir_path = is_valid_directory(args.output, True)
           if args.zip: process_zip()
           elif args.dir:
               if is_valid_directory(args.path):
@@ -308,7 +289,9 @@ def main () :
 
 # Available Options and Flags
 print()
-parser = ArgumentParser(description=f'{I}Encrypts and Decrypts Data{r}', epilog='Made with <3 by @syr1ne && @1byteBoy', usage="%(prog)s [OPTIONS...] [PATH...]")
+parser = ArgumentParser(description=f'{I}Encrypts and Decrypts Data{r}', 
+                        epilog='Made with <3 by @syr1ne && @1byteBoy', 
+                        usage="%(prog)s [OPTIONS...] [PATH...]")
 
 parser.add_argument("-e", "--encrypt", action="store_true", help="Encrypt the file")
 parser.add_argument("-d", "--decrypt", action="store_true", help="Decrypt the file")
