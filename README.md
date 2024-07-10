@@ -1,4 +1,4 @@
-## What is SecureSymmetric ?
+## What is SecureSymmetric 🯄
 
 In general it's a cool name for the project but actually it's just a simple program that encrypts file using 
 *fernet's symmetric secret key based authenticated cryptography.*
@@ -24,21 +24,22 @@ $ python3 secure.py
  
 usage: secure.py [OPTIONS...] [PATH...]
 
-Encrypts and Decrypts plain-text data
+Encrypts and Decrypts Data
 
 options:
   -h, --help          show this help message and exit
   -e, --encrypt       Encrypt the file
   -d, --decrypt       Decrypt the file
+  -p, --print         Print decrypted data directly
   -D, --dir           Work with a whole directory of files
-  -x, --extensions    Specify specific file extensions
-  -u, --upload        upload file on discord
-  -o, --output        Output file path
-  -r, --remove        Removes original file after encryting or decrypting
+  -x , --extensions   Specify specific file extensions
+  -u, --upload        Upload file|s on discord
+  -o , --output       Output directory path
+  -r, --remove        Removes original file|s after encrytion or decryption
+  -z, --zip           File|s get Zipped and then encrypted
 
-Made with <3 by @syr1ne && @1byteBoy
+Made with ❤ by @syr1ne && @1byteBoy
 ```
------
 
 **While main options are self-explainatory but to understand more about what each flags/options actually does visit [Usage WiKi](https://github.com/RootMiner/SecureSymmetric/wiki#usage)**
 

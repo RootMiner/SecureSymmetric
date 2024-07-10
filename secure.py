@@ -21,8 +21,10 @@ from src.color_cat import print_decrypted_data
 
 if   system() == 'Linux'  : separator = '/'
 elif system() == 'Windows': separator = '\\'
+
 write_file    = False
 overwrite_all = False
+delete_files  = False
 
 file_count = 0
 skip_count = 0
@@ -182,7 +184,7 @@ def is_valid_directory (dir_path, is_out_dir=None):
 
 def process_file (fernet, file_path):
   is_file, file_name, path, data = validate_file(file_path)
-  global file_count
+  global file_count, delete_files
   file_count = file_count + 1
   if is_file:
     if args.zip and fernet is None: return True
@@ -193,11 +195,28 @@ def process_file (fernet, file_path):
       fernet = input_master_key()
     process_data(file_name, path, data, fernet)
     if args.remove and write_file: 
-      # print(f"Deleting : {file_name}")
       if args.upload and not args.decrypt: pass
       else:
-        if input(f"[{Q}] Do you want to delete {file_path} [Y/n] : ") in ["", "y", "Y"]: os.remove(file_path)
-        else: pass
+        if delete_files == False: 
+          while True:
+            YANforD = input(f"[{Q}] Do you want to delete {file_name} [Y]es/[A]ll/[N]o: ").lower()
+            if   YANforD == 'y': 
+              os.remove(file_path)
+              print(f"[{S}] Sucessfully Deleted : {file_name}")
+              break
+            elif YANforD == 'a':
+              while True:
+                dconfirm = input(f"[{Q}] Are you sure you want to delete every other files ? [Y/n] : ").lower()
+                if dconfirm == 'y':
+                  os.remove(file_path)
+                  print(f"[{S}] Sucessfully Deleted : {file_name}")
+                  delete_files = True
+                  break
+                elif dconfirm == 'n': break
+            if delete_files or YANforD : break
+        else:
+          os.remove(file_path)
+          print(f"[{S}] Sucessfully Deleted : {file_name}")
 
 
 def upload_online ():
@@ -264,8 +283,9 @@ def process_zip ():
 
 # initial logic and condition sets
 def main () :
-  global its_out_dir, out_dir_path
-  its_out_dir = False
+  global its_out_dir, out_dir_path, delete_files
+  delete_files  = False
+  its_out_dir   = False
   if not any(vars(args).values()): parser.print_help()
   elif args.encrypt and args.decrypt:
       print(f"[{E}] Please use only one cryptographic process")
