@@ -33,9 +33,9 @@ options:
   -d, --decrypt       Decrypt the file
   -p, --print         Print decrypted data directly
   -D, --dir           Work with a whole directory of files
-  -x , --extensions   Specify specific file extensions
+  -x, --extensions    Specify specific file extensions
   -u, --upload        Upload file|s on discord
-  -o , --output       Output directory path
+  -o, --output        Output directory path
   -r, --remove        Removes original file|s after encrytion or decryption
   -z, --zip           File|s get Zipped and then encrypted
 
