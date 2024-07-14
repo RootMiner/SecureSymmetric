@@ -202,21 +202,21 @@ def process_file (fernet, file_path):
             YANforD = input(f"[{Q}] Do you want to delete {file_name} [Y]es/[A]ll/[N]o: ").lower()
             if   YANforD == 'y': 
               os.remove(file_path)
-              print(f"[{S}] Sucessfully Deleted : {file_name}")
+              print(f"[{S}] Successfully Deleted : {file_name}")
               break
             elif YANforD == 'a':
               while True:
                 dconfirm = input(f"[{Q}] Are you sure you want to delete every other files ? [Y/n] : ").lower()
                 if dconfirm == 'y':
                   os.remove(file_path)
-                  print(f"[{S}] Sucessfully Deleted : {file_name}")
+                  print(f"[{S}] Successfully Deleted : {file_name}")
                   delete_files = True
                   break
                 elif dconfirm == 'n': break
             if delete_files or YANforD : break
         else:
           os.remove(file_path)
-          print(f"[{S}] Sucessfully Deleted : {file_name}")
+          print(f"[{S}] Successfully Deleted : {file_name}")
 
 
 def upload_online ():
