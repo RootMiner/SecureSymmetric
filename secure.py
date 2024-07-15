@@ -46,10 +46,10 @@ def gen_fernet_key (masterpass:bytes) -> bytes:
 def input_master_key ():
   if   args.encrypt: for_what = 'Encryption'
   elif args.decrypt: for_what = 'Decryption'
-  masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password : ")
-  confirm_masterpass = getpass(f"{P}[Œ]{r} Conf. {for_what} Password : ")
+  masterpass = getpass(f"{ED} Enter {for_what} Password : ")
+  confirm_masterpass = getpass(f"{ED} Conf. {for_what} Password : ")
   if masterpass != confirm_masterpass:
-    print(f"\n[{E}] Password Mismatch. Try again!")
+    print(f"\n{E} Password Mismatch. Try again!")
     exit()
   print(f"{R}--------{G}-----------{B}----------{C}-----------{r}")
   key = gen_fernet_key(masterpass.encode('utf-8'))
@@ -68,7 +68,7 @@ def process_data (file_name, path, data, fernet):
       dec_data = fernet.decrypt(data)
       write_file = True
     except:
-      print(f"[{E}] Decryption Failed for {R}{file_name}{r}")
+      print(f"{E} Decryption Failed for {R}{file_name}{r}")
       # variable implimented not to write or remove files if the decryption failed
       dec_failed = True
 
@@ -81,9 +81,9 @@ def process_data (file_name, path, data, fernet):
     file_path, mod_file_name = file_tweak(file_name, path)
 
   if os.path.exists(file_path) and not overwrite_all and not dec_failed:
-    print(f"\n[{E}] A file named {C}{mod_file_name}{r} already exists.")
+    print(f"\n{E} A file named {C}{mod_file_name}{r} already exists.")
     while True:
-      y_or_n = input(f"[{Q}] Do you want to overwrite [Y]es/[A]ll/[N]o: ").lower()
+      y_or_n = input(f"{Q} Do you want to overwrite [Y]es/[A]ll/[N]o: ").lower()
       if   y_or_n == 'y': pass; break
       elif y_or_n == 'a': overwrite_all = True; break
       elif y_or_n == 'n': write_file = False; break            
@@ -95,11 +95,11 @@ def process_data (file_name, path, data, fernet):
           if system() == 'Linux': os.chmod(file_path, 0o600)
           # if system() == 'Windows': 
           # os.chmod(file_path, stat.S_IREAD) # read only permission set for windows
-          print(f"[{S}] Successfully Encrypted {G}{file_name}{r}")
+          print(f"{S} Successfully Encrypted {G}{file_name}{r}")
         elif args.decrypt and dec_failed == False:
           output_file.write(dec_data)
-          os.chmod(file_path, 0o644)
-          print(f"[{S}] Successfully Decrypted {G}{file_name}{r}")
+          # os.chmod(file_path, 0o600)
+          print(f"{S} Successfully Decrypted {G}{file_name}{r}")
           if args.print and not dec_failed and not args.encrypt:
             print_decrypted_data(dec_data, mod_file_name)
     if args.upload and args.encrypt:
@@ -117,8 +117,8 @@ def path_handling (path):
         bogus_path = bogus_path + 1
     else: obj_name = path
   except AttributeError:
-    if args.dir: print(f"[{E}] Please provide a directory path")
-    else: print(f"[{E}] Please provide a file path")
+    if args.dir: print(f"{E} Please provide a directory path")
+    else: print(f"{E} Please provide a file path")
     exit()
 
   obj_path = separator.join(path.split(separator)[:-bogus_path])
@@ -138,11 +138,11 @@ def validate_file (file_path):
       # to prevent encrypting an already encrypted file
       if args.encrypt and string == "gAAAAABm":
         skip_count = skip_count + 1
-        print (f"[{E}] Skipping {fileName}, file is already encrypted")
+        print (f"{E} Skipping {fileName}, file is already encrypted")
         return False, None, None, None
       # to prevent checking files that doesn't have encrypted data
       elif args.decrypt and not string == "gAAAAABm":
-        print (f"[{E}] Skipping {fileName}, file is not an encrypted file")
+        print (f"{E} Skipping {fileName}, file is not an encrypted file")
         return False, None, None, None
 
     if fileName != path: filePath = path + fileName
@@ -151,10 +151,10 @@ def validate_file (file_path):
       theFile.seek(0)
       data = theFile.read()
       return True, fileName, path, data
-  except FileNotFoundError : print(f"[{E}] The specified file {C}{fileName}{r} does not exist")
-  except PermissionError   : print(f"[{E}] Permission denied for file {C}{fileName}{r}")
-  except IsADirectoryError : print(f"[{E}] {B}{fileName}{r} is a directory"); exit()
-  except NotADirectoryError: print(f"[{E}] What the $%&* is {Y}{fileName}{r}")
+  except FileNotFoundError : print(f"{E} The specified file {C}{fileName}{r} does not exist")
+  except PermissionError   : print(f"{E} Permission denied for file {C}{fileName}{r}")
+  except IsADirectoryError : print(f"{E} {B}{fileName}{r} is a directory"); exit()
+  except NotADirectoryError: print(f"{E} What the $%&* is {Y}{fileName}{r}")
   # except UnicodeDecodeError: print(f"[{E}] Sorry, binary file ({G}{fileName}{r}) support coming soon!")
   return False, None, None, None
 
@@ -165,7 +165,7 @@ def is_valid_directory (dir_path, is_out_dir=None):
   try:
     if is_out_dir:
       if not os.access(dir_path, os.W_OK):
-        print(f"[{E}] Write Permission denied on output folder {B}{directory_name}{r}")
+        print(f"{E} Write Permission denied on output folder {B}{directory_name}{r}")
         exit(0)
       if directory_name == path: path = path + separator
       else: path = path + directory_name + separator
@@ -173,12 +173,12 @@ def is_valid_directory (dir_path, is_out_dir=None):
     if len(dirContent) > 0 or is_out_dir:
       if is_out_dir: return True, path
       else: return True
-    else: print(f"[{E}] {B}{directory_name}{r} is an empty directory"); exit()
+    else: print(f"{E} {B}{directory_name}{r} is an empty directory"); exit()
   except FileNotFoundError:
-    if is_out_dir: print(f"[{E}] Invalid output directory {B}{directory_name}{r}"); exit()
-    else: print(f"[{E}] The specified directory {B}{directory_name}{r} does not exist")
-  except PermissionError   : print(f"[{E}] Permission denied for folder {B}{directory_name}{r}")
-  except NotADirectoryError: print(f"[{E}] {B}{directory_name}{r} is not a directory")
+    if is_out_dir: print(f"{E} Invalid output directory {B}{directory_name}{r}"); exit()
+    else: print(f"{E} The specified directory {B}{directory_name}{r} does not exist")
+  except PermissionError   : print(f"{E} Permission denied for folder {B}{directory_name}{r}")
+  except NotADirectoryError: print(f"{E} {B}{directory_name}{r} is not a directory")
   return False
 
 
@@ -199,24 +199,24 @@ def process_file (fernet, file_path):
       else:
         if delete_files == False: 
           while True:
-            YANforD = input(f"[{Q}] Do you want to delete {file_name} [Y]es/[A]ll/[N]o: ").lower()
+            YANforD = input(f"{Q} Do you want to delete {file_name} [Y]es/[A]ll/[N]o: ").lower()
             if   YANforD == 'y': 
               os.remove(file_path)
-              print(f"[{S}] Successfully Deleted : {file_name}")
+              print(f"{S} Successfully Deleted : {file_name}")
               break
             elif YANforD == 'a':
               while True:
-                dconfirm = input(f"[{Q}] Are you sure you want to delete every other files ? [Y/n] : ").lower()
+                dconfirm = input(f"{Q} Are you sure you want to delete every other files ? [Y/n] : ").lower()
                 if dconfirm == 'y':
                   os.remove(file_path)
-                  print(f"[{S}] Successfully Deleted : {file_name}")
+                  print(f"{S} Successfully Deleted : {file_name}")
                   delete_files = True
                   break
                 elif dconfirm == 'n': break
             if delete_files or YANforD : break
         else:
           os.remove(file_path)
-          print(f"[{S}] Successfully Deleted : {file_name}")
+          print(f"{S} Successfully Deleted : {file_name}")
 
 
 def upload_online ():
@@ -243,55 +243,55 @@ def dir_contents (fernet=None):
 
 
 def process_zip ():
+
   def zipping():
-      fernet = input_master_key()
-      print(f"\n[{S}] Archived Successfully")
-      # print(f"{archive_name}.{archive_format}"); exit()
-      process_file(fernet, f"{archive_name}.{archive_format}")
+    fernet = input_master_key()
+    print(f"\n{S} Archived Successfully")
+    # print(f"{archive_name}.{archive_format}"); exit()
+    process_file(fernet, f"{archive_name}.{archive_format}")
 
   if args.zip and args.encrypt:
-      archive_format = 'zip' # 'zip', 'tar', 'gztar', 'bztar', 'xztar'
-      obj_name, archive_path = path_handling(args.path)
-      if obj_name != archive_path: 
-        archive_path = archive_path + obj_name # original directory path
-      if '.' in obj_name: 
-        archive_name = obj_name.split('.')[0]
-      else:  archive_name = obj_name
-      # custom output zip file directory
-      if its_out_dir:
-        archive_name = out_dir_path + archive_name
-      if args.dir:
-          if is_valid_directory(args.path):
-              if args.extensions: 
-                zip_files = dir_contents()
-                archive_path = mkdtemp()
-                for file in zip_files:
-                  copy(file, archive_path)
-              make_archive(archive_name, archive_format, archive_path)
-              zipping()
-              # removes the temorary directory
-              if args.extensions: rmtree(archive_path, ignore_errors=True)
-      else:
-          if process_file(None, args.path):
-              with ZipFile(f'{archive_name}.{archive_format}', 'w') as zipf:
-                zipf.write(archive_path, arcname=obj_name)
-              zipping()
+    archive_format = 'zip' # 'zip', 'tar', 'gztar', 'bztar', 'xztar'
+    obj_name, archive_path = path_handling(args.path)
+    if obj_name != archive_path: 
+      archive_path = archive_path + obj_name # original directory path
+    if '.' in obj_name: 
+      archive_name = obj_name.split('.')[0]
+    else:  archive_name = obj_name
+    # custom output zip file directory
+    if its_out_dir:
+      archive_name = out_dir_path + archive_name
+    if args.dir:
+      if is_valid_directory(args.path):
+        if args.extensions: 
+          zip_files = dir_contents()
+          archive_path = mkdtemp()
+          for file in zip_files:
+            copy(file, archive_path)
+        make_archive(archive_name, archive_format, archive_path)
+        zipping()
+        # removes the temorary directory
+        if args.extensions: rmtree(archive_path, ignore_errors=True)
+    else:
+      if process_file(None, args.path):
+        with ZipFile(f'{archive_name}.{archive_format}', 'w') as zipf:
+          zipf.write(archive_path, arcname=obj_name)
+        zipping()
   elif args.zip and not args.encrypt: 
-      print(f"[{E}] Zipping can only be performed while encrypting")    
+    print(f"{E} Zipping can only be performed while encrypting")    
   # -- nOte: adding option to remove the initial directory and files
 
 
 # initial logic and condition sets
 def main () :
-  global its_out_dir, out_dir_path, delete_files
-  delete_files  = False
+  global its_out_dir, out_dir_path
   its_out_dir   = False
   if not any(vars(args).values()): parser.print_help()
   elif args.encrypt and args.decrypt:
-      print(f"[{E}] Please use only one cryptographic process")
+      print(f"{E} Please use only one cryptographic process")
   elif args.encrypt or args.decrypt:
       if args.upload and args.decrypt: 
-        print(f"[{E}] Non Encrypted files will not be stored online for security reasons.\n") 
+        print(f"{E} Non Encrypted files will not be stored online for security reasons.\n") 
       try:
           if args.output :
               its_out_dir, out_dir_path = is_valid_directory(args.output, True)
@@ -304,7 +304,7 @@ def main () :
             process_file(None, args.path)
           upload_online()
       except KeyboardInterrupt: print(f"\n\n[»] Bye")
-  else: print(f"[{E}] Please choose a cryptographic process")
+  else: print(f"{E} Please choose a cryptographic process")
 
 
 # Available Options and Flags
