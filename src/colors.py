@@ -17,6 +17,8 @@ E = f'[{R}!{r}]'
 Q = f'[{Y}?{r}]'
 A = f'[{P}+{r}]'
 
+ED = f'[{P}Œ{r}]'
+
 # ------- Thinking of using it in future
 
 # class ShellColors:

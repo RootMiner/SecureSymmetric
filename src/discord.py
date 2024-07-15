@@ -10,13 +10,14 @@ if   system() == 'Linux'  : separator = '/'
 elif system() == 'Windows': separator = '\\'
 
 def write_env_var():
-  TOKEN   = getpass(f"\n[{A}] Enter your Discord Bot Token [hidden]: ")
-  CHANNEL = input(f"[{A}] Enter your_channel id: ")
+  TOKEN   = getpass(f"\n{A} Enter your Discord Bot Token [hidden]: ")
+  CHANNEL = input(f"{A} Enter your_channel id: ")
 
   with open('.env', "w") as env_file:
     env_file.write(f'DISCORD_TOKEN={TOKEN}')
     env_file.write(f'\nDISCORD_CHANNEL={CHANNEL}')
 
+  os.chmod('.env', 0o600)
   return TOKEN, CHANNEL
 
 
@@ -45,11 +46,11 @@ async def uploadFile(files_dict, is_remove):
 
   @client.event
   async def on_ready():
-    print(f"\n[{S}] {client.user} has connected to Discord!\n")
+    print(f"\n{S} {client.user} has connected to Discord!\n")
     channel = await client.fetch_channel(CHANNEL)
     for file_name, file_path in files_dict.items():
       await channel.send(file=discord.File(file_path))
-      print(f"[{S}] {file_name.ljust(max_name_len)} uploaded on discord successfully")
+      print(f"{S} {file_name.ljust(max_name_len)} uploaded on discord successfully")
       # this helps to directly remove enc_file from host
       _, mod_file_name = file_tweak(file_name, file_path.split(separator)[0], None)
       file_path = file_path.split(separator)[0]
@@ -65,7 +66,7 @@ async def uploadFile(files_dict, is_remove):
     # await client.close() # --> this isn't working 
   except discord.errors.LoginFailure:
     await client.close()
-    print(f"\n[{E}] Invalid TOKEN or Channel ID")
+    print(f"\n{E} Invalid TOKEN or Channel ID")
     write_env_var()
     await uploadFile(files_dict, is_remove)
 

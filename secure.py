@@ -46,8 +46,8 @@ def gen_fernet_key (masterpass:bytes) -> bytes:
 def input_master_key ():
   if   args.encrypt: for_what = 'Encryption'
   elif args.decrypt: for_what = 'Decryption'
-  masterpass = getpass(f"{P}[Œ]{r} Enter {for_what} Password : ")
-  confirm_masterpass = getpass(f"{P}[Œ]{r} Conf. {for_what} Password : ")
+  masterpass = getpass(f"{ED} Enter {for_what} Password : ")
+  confirm_masterpass = getpass(f"{ED} Conf. {for_what} Password : ")
   if masterpass != confirm_masterpass:
     print(f"\n{E} Password Mismatch. Try again!")
     exit()
@@ -98,7 +98,7 @@ def process_data (file_name, path, data, fernet):
           print(f"{S} Successfully Encrypted {G}{file_name}{r}")
         elif args.decrypt and dec_failed == False:
           output_file.write(dec_data)
-          os.chmod(file_path, 0o644)
+          # os.chmod(file_path, 0o600)
           print(f"{S} Successfully Decrypted {G}{file_name}{r}")
           if args.print and not dec_failed and not args.encrypt:
             print_decrypted_data(dec_data, mod_file_name)
@@ -243,48 +243,48 @@ def dir_contents (fernet=None):
 
 
 def process_zip ():
+
   def zipping():
-      fernet = input_master_key()
-      print(f"\n{S} Archived Successfully")
-      # print(f"{archive_name}.{archive_format}"); exit()
-      process_file(fernet, f"{archive_name}.{archive_format}")
+    fernet = input_master_key()
+    print(f"\n{S} Archived Successfully")
+    # print(f"{archive_name}.{archive_format}"); exit()
+    process_file(fernet, f"{archive_name}.{archive_format}")
 
   if args.zip and args.encrypt:
-      archive_format = 'zip' # 'zip', 'tar', 'gztar', 'bztar', 'xztar'
-      obj_name, archive_path = path_handling(args.path)
-      if obj_name != archive_path: 
-        archive_path = archive_path + obj_name # original directory path
-      if '.' in obj_name: 
-        archive_name = obj_name.split('.')[0]
-      else:  archive_name = obj_name
-      # custom output zip file directory
-      if its_out_dir:
-        archive_name = out_dir_path + archive_name
-      if args.dir:
-          if is_valid_directory(args.path):
-              if args.extensions: 
-                zip_files = dir_contents()
-                archive_path = mkdtemp()
-                for file in zip_files:
-                  copy(file, archive_path)
-              make_archive(archive_name, archive_format, archive_path)
-              zipping()
-              # removes the temorary directory
-              if args.extensions: rmtree(archive_path, ignore_errors=True)
-      else:
-          if process_file(None, args.path):
-              with ZipFile(f'{archive_name}.{archive_format}', 'w') as zipf:
-                zipf.write(archive_path, arcname=obj_name)
-              zipping()
+    archive_format = 'zip' # 'zip', 'tar', 'gztar', 'bztar', 'xztar'
+    obj_name, archive_path = path_handling(args.path)
+    if obj_name != archive_path: 
+      archive_path = archive_path + obj_name # original directory path
+    if '.' in obj_name: 
+      archive_name = obj_name.split('.')[0]
+    else:  archive_name = obj_name
+    # custom output zip file directory
+    if its_out_dir:
+      archive_name = out_dir_path + archive_name
+    if args.dir:
+      if is_valid_directory(args.path):
+        if args.extensions: 
+          zip_files = dir_contents()
+          archive_path = mkdtemp()
+          for file in zip_files:
+            copy(file, archive_path)
+        make_archive(archive_name, archive_format, archive_path)
+        zipping()
+        # removes the temorary directory
+        if args.extensions: rmtree(archive_path, ignore_errors=True)
+    else:
+      if process_file(None, args.path):
+        with ZipFile(f'{archive_name}.{archive_format}', 'w') as zipf:
+          zipf.write(archive_path, arcname=obj_name)
+        zipping()
   elif args.zip and not args.encrypt: 
-      print(f"{E} Zipping can only be performed while encrypting")    
+    print(f"{E} Zipping can only be performed while encrypting")    
   # -- nOte: adding option to remove the initial directory and files
 
 
 # initial logic and condition sets
 def main () :
-  global its_out_dir, out_dir_path, delete_files
-  delete_files  = False
+  global its_out_dir, out_dir_path
   its_out_dir   = False
   if not any(vars(args).values()): parser.print_help()
   elif args.encrypt and args.decrypt:
