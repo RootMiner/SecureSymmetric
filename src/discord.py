@@ -55,9 +55,9 @@ async def uploadFile(files_dict, is_remove):
       _, mod_file_name = file_tweak(file_name, file_path.split(separator)[0], None)
       file_path = file_path.split(separator)[0]
       if is_remove:
-        if input("do you want to delete " + mod_file_name + " [Y/n]: ") in ["", "y", "Y"]: os.remove(mod_file_name)
+        if input("Do you want to delete " + mod_file_name + " [Y/n]: ") in ["", "y", "Y"]: os.remove(mod_file_name)
         else: pass
-        if input("do you want to delete " + file_path + " [Y/n]: ") in ["", "y", "Y"]: os.remove(file_path)
+        if input("Do you want to delete " + file_path + " [Y/n]: ") in ["", "y", "Y"]: os.remove(file_path)
         else: pass
     print(f"\n[-:-] Please do Ctrl + c to turn off the bot")
 
