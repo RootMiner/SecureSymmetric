@@ -250,14 +250,15 @@ def process_zip ():
     # print(f"{archive_name}.{archive_format}"); exit()
     process_file(fernet, f"{archive_name}.{archive_format}")
 
-  if args.zip and args.encrypt:
+  if args.encrypt:
     archive_format = 'zip' # 'zip', 'tar', 'gztar', 'bztar', 'xztar'
     obj_name, archive_path = path_handling(args.path)
     if obj_name != archive_path: 
       archive_path = archive_path + obj_name # original directory path
+      print(archive_path); exit()
     if '.' in obj_name: 
       archive_name = obj_name.split('.')[0]
-    else:  archive_name = obj_name
+    else: archive_name = obj_name
     # custom output zip file directory
     if its_out_dir:
       archive_name = out_dir_path + archive_name
@@ -277,13 +278,13 @@ def process_zip ():
         with ZipFile(f'{archive_name}.{archive_format}', 'w') as zipf:
           zipf.write(archive_path, arcname=obj_name)
         zipping()
-  elif args.zip and not args.encrypt: 
+  else: 
     print(f"{E} Zipping can only be performed while encrypting")    
   # -- nOte: adding option to remove the initial directory and files
 
 
 # initial logic and condition sets
-def main () :
+def main ():
   global its_out_dir, out_dir_path
   its_out_dir   = False
   if not any(vars(args).values()): parser.print_help()
