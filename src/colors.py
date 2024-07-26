@@ -12,10 +12,12 @@ r = '\033[0m'   # reset color value
 I = '\033[3m'  # Italic
 
 # Success, Error and Question prompt color coding
-S = f'{G}*{r}'
-E = f'{R}!{r}'
-Q = f'{Y}?{r}'
-A = f'{P}+{r}'
+S = f'[{G}*{r}]'
+E = f'[{R}!{r}]'
+Q = f'[{Y}?{r}]'
+A = f'[{P}+{r}]'
+
+ED = f'[{P}Œ{r}]'
 
 # ------- Thinking of using it in future
 
