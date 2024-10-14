@@ -1,6 +1,8 @@
-## What is SecureSymmetric 🯄
+<p align="center"><img src="https://github.com/user-attachments/assets/7cef9754-aad2-4b70-b672-7b6ac9c1b611"></p>
+<p align="center"><img src="https://img.shields.io/github/license/RootMiner/SecureSymmetric?style=for-the-badge"></p>
+<h1 align="center"> SecureSymmetric </h1>
 
-In general it's a cool name for the project but actually it's just a simple program that encrypts file using fernet's symmetric secret key based authenticated cryptography.
+SecureSymmetric is just a cool name we gave to our project but in reality it's just a simple program that encrypts file using fernet's symmetric secret key based authenticated cryptography.
 
 Learn more about Fernet at [cryptography.io](https://cryptography.io/en/latest/fernet/)
 
