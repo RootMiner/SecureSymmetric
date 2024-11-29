@@ -134,14 +134,14 @@ def validate_file (file_path):
   fileName, path = path_handling(file_path)
   try:
     with open(file_path, 'rb') as file:
-      string = file.readline()[:8].decode()
+      string = file.readline()[:4].decode()
       # to prevent encrypting an already encrypted file
-      if args.encrypt and string == "gAAAAABm":
+      if args.encrypt and string == "gAAA":
         skip_count = skip_count + 1
         print (f"{E} Skipping {fileName}, file is already encrypted")
         return False, None, None, None
       # to prevent checking files that doesn't have encrypted data
-      elif args.decrypt and not string == "gAAAAABm":
+      elif args.decrypt and not string == "gAAA":
         print (f"{E} Skipping {fileName}, file is not an encrypted file")
         return False, None, None, None
 
